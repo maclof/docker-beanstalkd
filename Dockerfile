@@ -1,11 +1,26 @@
-FROM phusion/baseimage:latest
+FROM debian
 MAINTAINER maclof@gmail.com
-RUN apt-get -y update
-RUN apt-get -y install wget build-essential
-RUN wget https://github.com/kr/beanstalkd/archive/v1.10.tar.gz
-RUN tar -zxf v1.10.tar.gz
-WORKDIR beanstalkd-1.10
-RUN make
-RUN cp beanstalkd /usr/bin/beanstalkd
+
+# Install the required software.
+RUN apt-get -y update \
+ && apt-get -y install wget build-essential
+
+# Set the environment variables.
+ENV BEANSTALKD_VERSION 1.10
+
+# Download and extract the source code.
+RUN wget --no-check-certificate https://github.com/kr/beanstalkd/archive/v$BEANSTALKD_VERSION.tar.gz \
+ && tar -zxf v$BEANSTALKD_VERSION.tar.gz
+
+# Change the working directory.
+WORKDIR beanstalkd-$BEANSTALKD_VERSION
+
+# Build the software.
+RUN make \
+ && cp beanstalkd /usr/bin/beanstalkd
+
+# Expose the ports.
 EXPOSE 11300
+
+# Set the launch command.
 CMD ["beanstalkd", "-p", "11300"]
